@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RxCross2 } from "react-icons/rx";
 import axios from 'axios';
 import { serverUrl } from '../App';
-import { setSearchItems, setUserData } from '../redux/userSlice';
+import { setSearchItems, setUserData, setCurrentCity } from '../redux/userSlice';
 import { FaPlus } from "react-icons/fa6";
 import { TbReceipt2 } from "react-icons/tb";
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,8 @@ function Nav() {
     const [showInfo, setShowInfo] = useState(false)
     const [showSearch, setShowSearch] = useState(false)
     const [query,setQuery]=useState("")
+    const [isEditingCity, setIsEditingCity] = useState(false)
+    const [editCityInput, setEditCityInput] = useState("")
     const dispatch = useDispatch()
     const navigate=useNavigate()
     const handleLogOut = async () => {
@@ -38,19 +40,44 @@ function Nav() {
 
     useEffect(()=>{
         if(query){
-handleSearchItems()
+            handleSearchItems()
         }else{
-              dispatch(setSearchItems(null))
+            dispatch(setSearchItems(null))
         }
-
     },[query])
+
+    const handleCitySubmit = (e) => {
+        if (e.key === 'Enter' || e.type === 'blur') {
+            if (editCityInput.trim()) {
+                dispatch(setCurrentCity(editCityInput.trim()));
+            }
+            setIsEditingCity(false);
+        }
+    };
+
+    const handleCityEditClick = () => {
+        setEditCityInput(currentCity || "");
+        setIsEditingCity(true);
+    };
     return (
         <div className='w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6] overflow-visible'>
 
             {showSearch && userData.role == "user" && <div className='w-[90%] h-[70px]  bg-white shadow-xl rounded-lg items-center gap-[20px] flex fixed top-[80px] left-[5%] md:hidden'>
-                <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400'>
+                <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400 cursor-pointer' onClick={!isEditingCity ? handleCityEditClick : undefined}>
                     <FaLocationDot size={25} className=" text-[#008000]" />
-                    <div className='w-[80%] truncate text-gray-600'>{currentCity}</div>
+                    {isEditingCity ? (
+                        <input
+                            type="text"
+                            value={editCityInput}
+                            onChange={(e) => setEditCityInput(e.target.value)}
+                            onBlur={handleCitySubmit}
+                            onKeyDown={handleCitySubmit}
+                            autoFocus
+                            className='w-[80%] text-gray-600 outline-none border-b border-[#008000] bg-transparent'
+                        />
+                    ) : (
+                        <div className='w-[80%] truncate text-gray-600'>{currentCity || "Select Location"}</div>
+                    )}
                 </div>
                 <div className='w-[80%] flex items-center gap-[10px]'>
                     <IoIosSearch size={25} className='text-[#008000]' />
@@ -62,9 +89,21 @@ handleSearchItems()
 
             <h1 className='text-3xl font-bold mb-2 text-[#008000]'>KhaoGharPe</h1>
             {userData.role == "user" && <div className='md:w-[60%] lg:w-[40%] h-[70px] bg-white shadow-xl rounded-lg items-center gap-[20px] hidden md:flex'>
-                <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400'>
+                <div className='flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px] border-gray-400 cursor-pointer' onClick={!isEditingCity ? handleCityEditClick : undefined}>
                     <FaLocationDot size={25} className=" text-[#008000]" />
-                    <div className='w-[80%] truncate text-gray-600'>{currentCity}</div>
+                    {isEditingCity ? (
+                        <input
+                            type="text"
+                            value={editCityInput}
+                            onChange={(e) => setEditCityInput(e.target.value)}
+                            onBlur={handleCitySubmit}
+                            onKeyDown={handleCitySubmit}
+                            autoFocus
+                            className='w-[80%] text-gray-600 outline-none border-b border-[#008000] bg-transparent'
+                        />
+                    ) : (
+                        <div className='w-[80%] truncate text-gray-600'>{currentCity || "Select Location"}</div>
+                    )}
                 </div>
                 <div className='w-[80%] flex items-center gap-[10px]'>
                     <IoIosSearch size={25} className='text-[#008000]' />
